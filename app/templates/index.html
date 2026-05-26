@@ -139,7 +139,14 @@
         try {
           const res = await fetch("/api/ingest", { method: "POST", body: form });
           if (!res.ok) {
-            status.textContent = "업로드/판독 중 오류가 발생했습니다.";
+            let errMsg = `오류 (${res.status})`;
+            try {
+              const errData = await res.json();
+              errMsg = errData.detail || JSON.stringify(errData);
+            } catch(e) {
+              errMsg = await res.text() || errMsg;
+            }
+            status.textContent = `업로드/판독 오류: ${errMsg}`;
             return;
           }
           const data = await res.json();

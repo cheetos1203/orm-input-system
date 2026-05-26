@@ -52,23 +52,28 @@ async def ingest(files: list[UploadFile] = File(...)) -> IngestResponse:
     if not files:
         raise HTTPException(status_code=400, detail="업로드 파일이 없습니다.")
 
-    run_id = datetime_run_id()
-    paths: list[Path] = []
-    for upload in files:
-        path = save_upload_file(upload, settings=settings, run_id=run_id)
-        paths.append(path)
+    try:
+        run_id = datetime_run_id()
+        paths: list[Path] = []
+        for upload in files:
+            path = save_upload_file(upload, settings=settings, run_id=run_id)
+            paths.append(path)
 
-    sheets, _created_reviews, sheet_ids = ingest_and_persist(settings=settings, run_id=run_id, upload_paths=paths)
-    pending = len(list_review_items(settings, status="pending"))
-    result_urls = [f"/result/{sheet_id}" for sheet_id in sheet_ids]
-    return IngestResponse(
-        run_id=run_id,
-        files=len(paths),
-        sheets=sheets,
-        pending_reviews=pending,
-        sheet_ids=sheet_ids,
-        result_urls=result_urls,
-    )
+        sheets, _created_reviews, sheet_ids = ingest_and_persist(settings=settings, run_id=run_id, upload_paths=paths)
+        pending = len(list_review_items(settings, status="pending"))
+        result_urls = [f"/result/{sheet_id}" for sheet_id in sheet_ids]
+        return IngestResponse(
+            run_id=run_id,
+            files=len(paths),
+            sheets=sheets,
+            pending_reviews=pending,
+            sheet_ids=sheet_ids,
+            result_urls=result_urls,
+        )
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"처리 오류: {type(exc).__name__}: {exc}")
 
 
 @app.get("/api/results")
