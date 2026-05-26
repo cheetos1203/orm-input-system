@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OMR 자동입력 시스템</title>
+    <style>
+      :root {
+        --bg: #f5f7fc;
+        --card: #ffffff;
+        --line: #d8deea;
+        --text: #1e2b3b;
+        --muted: #56667a;
+        --primary: #0f6fdb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+        background: radial-gradient(circle at top, #f7faff, var(--bg));
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 860px;
+        margin: 26px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+      }
+      .desc {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+      .uploader {
+        border: 1px dashed #b9c8dd;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+        background: #fbfcff;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      input[type="file"] {
+        width: 100%;
+        max-width: 540px;
+      }
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 10px;
+        color: #30445d;
+      }
+      .links {
+        margin-top: 14px;
+        border-top: 1px solid #ebeff6;
+        padding-top: 12px;
+      }
+      .links a {
+        color: #1b5fc4;
+        text-decoration: none;
+      }
+      .links a:hover {
+        text-decoration: underline;
+      }
+      .tips {
+        margin-top: 16px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>OMR 자동입력 + 성적처리 웹 서비스</h1>
+        <p class="desc">시험지 PDF/이미지를 업로드하면 자동 판독 후 결과 페이지를 생성합니다.</p>
+
+        <div class="uploader">
+          <div class="row">
+            <input id="files" type="file" multiple />
+            <button id="runBtn" onclick="runIngest()">입력 시작</button>
+          </div>
+          <div id="status" class="status"></div>
+        </div>
+
+        <div class="links">
+          <div>API 문서: <a href="/docs" target="_blank" rel="noreferrer">/docs</a></div>
+          <div>오류 검수: <a href="/review" target="_blank" rel="noreferrer">/review</a></div>
+          <div>헬스체크: <a href="/api/health" target="_blank" rel="noreferrer">/api/health</a></div>
+        </div>
+
+        <div class="tips">
+          업로드 후 자동으로 첫 번째 결과 페이지로 이동합니다.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function runIngest() {
+        const files = document.getElementById("files").files;
+        const status = document.getElementById("status");
+        const runBtn = document.getElementById("runBtn");
+        if (!files || files.length === 0) {
+          alert("파일을 먼저 선택해주세요.");
+          return;
+        }
+
+        const form = new FormData();
+        for (const file of files) form.append("files", file);
+
+        runBtn.disabled = true;
+        status.textContent = "판독 중입니다...";
+
+        try {
+          const res = await fetch("/api/ingest", { method: "POST", body: form });
+          if (!res.ok) {
+            status.textContent = "업로드/판독 중 오류가 발생했습니다.";
+            return;
+          }
+          const data = await res.json();
+          if (data.result_urls && data.result_urls.length > 0) {
+            status.textContent = "완료! 결과 페이지로 이동합니다.";
+            window.location.href = data.result_urls[0];
+            return;
+          }
+          status.textContent = "완료되었지만 결과 페이지를 찾지 못했습니다.";
+        } catch (error) {
+          status.textContent = "네트워크 오류가 발생했습니다.";
+        } finally {
+          runBtn.disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>
+

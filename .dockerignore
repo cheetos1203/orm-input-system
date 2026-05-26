@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+data/uploads/*
+data/review/*
+data/outputs/*
+!data/uploads/.gitkeep
+!data/review/.gitkeep
+!data/outputs/.gitkeep
+

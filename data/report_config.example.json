@@ -1,0 +1,100 @@
+{
+  "school_name": "이감 QA 전문 학원",
+  "exam_round": "2026 시즌2-1회차",
+  "subject_name": "언어와 매체",
+  "academy_avg_total": 30.2,
+  "national_avg_total": 0,
+  "grade_cut": {
+    "1": 85,
+    "2": 79,
+    "3": 70,
+    "4": 60
+  },
+  "domains": [
+    {
+      "name": "독서",
+      "max_score": 38,
+      "start": 1,
+      "end": 17,
+      "academy_avg": 11.8,
+      "national_avg": 0,
+      "groups": [
+        {
+          "label": "독서(독서론)",
+          "start": 1,
+          "end": 4
+        },
+        {
+          "label": "독서(인문통합)",
+          "start": 5,
+          "end": 10
+        },
+        {
+          "label": "독서(과학·기술)",
+          "start": 11,
+          "end": 13
+        },
+        {
+          "label": "독서(사회)",
+          "start": 14,
+          "end": 17
+        }
+      ]
+    },
+    {
+      "name": "문학",
+      "max_score": 38,
+      "start": 18,
+      "end": 34,
+      "academy_avg": 13,
+      "national_avg": 0,
+      "groups": [
+        {
+          "label": "문학(고전소설)",
+          "start": 18,
+          "end": 21
+        },
+        {
+          "label": "문학(고전시가+수필통합)",
+          "start": 22,
+          "end": 25
+        },
+        {
+          "label": "문학(현대소설)",
+          "start": 26,
+          "end": 30
+        },
+        {
+          "label": "문학(현대시)",
+          "start": 31,
+          "end": 34
+        }
+      ]
+    },
+    {
+      "name": "언어와 매체",
+      "max_score": 24,
+      "start": 35,
+      "end": 45,
+      "academy_avg": 5.3,
+      "national_avg": 0,
+      "groups": [
+        {
+          "label": "언어",
+          "start": 35,
+          "end": 40
+        },
+        {
+          "label": "매체",
+          "start": 41,
+          "end": 43
+        },
+        {
+          "label": "매체-언어 통합",
+          "start": 44,
+          "end": 45
+        }
+      ]
+    }
+  ]
+}

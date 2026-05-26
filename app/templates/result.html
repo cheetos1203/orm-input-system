@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>성적표</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #ececf1;
+        --panel: #f6f6fb;
+        --line: #c4c9dc;
+        --head: #d8dced;
+        --text: #1d2430;
+        --muted: #637083;
+        --purple: #9350e9;
+        --pink: #f08085;
+        --sky: #6db6eb;
+        --ok: #0f74db;
+        --no: #e65252;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #dfe0e3;
+        color: var(--text);
+        font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+      }
+      .page {
+        width: min(1120px, 94vw);
+        margin: 16px auto;
+        background: var(--bg);
+        border: 1px solid #d4d6de;
+        box-shadow: 0 2px 8px rgba(18, 24, 40, 0.05);
+        padding: 26px 34px 38px;
+        position: relative;
+      }
+      .watermark {
+        position: absolute;
+        width: 360px;
+        height: 220px;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 80px;
+        opacity: 0.12;
+        pointer-events: none;
+      }
+      .watermark .circle {
+        width: 205px;
+        height: 205px;
+        border-radius: 50%;
+        background: #bfc4d8;
+        position: absolute;
+        left: 0;
+        top: 8px;
+      }
+      .watermark .tri {
+        width: 0;
+        height: 0;
+        border-left: 190px solid transparent;
+        border-top: 190px solid #bfc4d8;
+        position: absolute;
+        right: 0;
+        top: 12px;
+      }
+      .title-line {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        margin-bottom: 20px;
+      }
+      .title-line h1 {
+        margin: 0;
+        font-size: 46px;
+        letter-spacing: -0.8px;
+        font-weight: 800;
+      }
+      .brand {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #315068;
+        font-weight: 900;
+        font-size: 36px;
+      }
+      .brand-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: 5px solid #3ea6ab;
+        position: relative;
+      }
+      .brand-badge::after {
+        content: "M";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -54%);
+        font-size: 25px;
+        font-weight: 900;
+        color: #37607e;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .meta-table th,
+      .meta-table td {
+        border: 1px solid var(--line);
+        padding: 8px 10px;
+        font-size: 26px;
+      }
+      .meta-table th {
+        background: var(--head);
+        text-align: left;
+        color: #334765;
+      }
+      .section {
+        margin-top: 22px;
+      }
+      .section h2 {
+        margin: 0 0 10px;
+        font-size: 42px;
+        letter-spacing: -0.8px;
+      }
+      .split-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .score-table th,
+      .score-table td {
+        border: 1px solid var(--line);
+        padding: 8px 10px;
+        text-align: center;
+        font-size: 34px;
+      }
+      .score-table th {
+        background: var(--head);
+        color: #334765;
+      }
+      .domain-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 26px;
+        align-items: start;
+      }
+      .domain-table th,
+      .domain-table td {
+        border: 1px solid var(--line);
+        padding: 8px;
+        text-align: right;
+        font-size: 30px;
+      }
+      .domain-table th {
+        background: var(--head);
+        color: #334765;
+      }
+      .domain-table th:first-child,
+      .domain-table td:first-child {
+        text-align: left;
+      }
+      .chart-wrap {
+        background: transparent;
+        border: 1px solid transparent;
+        padding-top: 12px;
+      }
+      .corr-table {
+        table-layout: fixed;
+      }
+      .corr-table th,
+      .corr-table td {
+        border: 1px solid var(--line);
+        font-size: 28px;
+        text-align: center;
+        padding: 6px 2px;
+      }
+      .corr-table th {
+        background: var(--head);
+        color: #334765;
+        font-weight: 700;
+      }
+      .corr-table .left {
+        width: 138px;
+        font-weight: 700;
+      }
+      .corr-table .group-row th {
+        background: #e2e5f2;
+      }
+      .ox-o {
+        color: var(--ok);
+        font-weight: 800;
+      }
+      .ox-x {
+        color: var(--no);
+        font-weight: 800;
+      }
+      .ox-empty {
+        color: var(--muted);
+      }
+      .trend-panel {
+        margin-top: 26px;
+        border: 1px solid transparent;
+      }
+      .print-box {
+        text-align: center;
+        margin-top: 28px;
+      }
+      .print-btn {
+        background: var(--purple);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 30px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .print-help {
+        margin-top: 16px;
+        font-size: 34px;
+        color: #2e3e54;
+      }
+      .break-before {
+        break-before: page;
+        page-break-before: always;
+      }
+      @media (max-width: 980px) {
+        .title-line h1 {
+          font-size: 30px;
+        }
+        .brand {
+          position: static;
+          transform: none;
+          font-size: 24px;
+          margin-left: 10px;
+        }
+        .meta-table th,
+        .meta-table td,
+        .score-table th,
+        .score-table td,
+        .domain-table th,
+        .domain-table td,
+        .corr-table th,
+        .corr-table td {
+          font-size: 14px;
+        }
+        .section h2 {
+          font-size: 25px;
+        }
+        .split-2,
+        .domain-grid {
+          grid-template-columns: 1fr;
+        }
+        .print-btn {
+          font-size: 18px;
+        }
+        .print-help {
+          font-size: 16px;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+        }
+        .page {
+          margin: 0;
+          width: 100%;
+          box-shadow: none;
+          border: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="page">
+      <div class="title-line">
+        <h1>이감 모의고사 성적표</h1>
+        <div class="brand"><span class="brand-badge"></span>Q-MEET</div>
+      </div>
+
+      <table class="meta-table">
+        <tr>
+          <th>학원명</th>
+          <th>이름(수험번호)</th>
+          <th>회차</th>
+          <th>선택과목</th>
+        </tr>
+        <tr>
+          <td>{{ school_name or "-" }}</td>
+          <td>{{ student_display }}</td>
+          <td>{{ exam_round or "-" }}</td>
+          <td>{{ subject_name or "-" }}</td>
+        </tr>
+      </table>
+
+      <div class="section split-2">
+        <div>
+          <h2>개인 성적</h2>
+          <table class="score-table">
+            <tr>
+              <th>원점수</th>
+              <th>등급</th>
+              <th>학원 석차</th>
+            </tr>
+            <tr>
+              <td>{{ total_score|round(1) }}</td>
+              <td>{{ grade }}</td>
+              <td>{{ academy_rank }}</td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <h2>등급 컷</h2>
+          <table class="score-table">
+            <tr>
+              <th>1등급</th>
+              <th>2등급</th>
+              <th>3등급</th>
+              <th>4등급</th>
+            </tr>
+            <tr>
+              <td>{{ grade_cut["1"] }}</td>
+              <td>{{ grade_cut["2"] }}</td>
+              <td>{{ grade_cut["3"] }}</td>
+              <td>{{ grade_cut["4"] }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>영역별 점수</h2>
+        <div class="domain-grid">
+          <div>
+            <table class="domain-table">
+              <tr>
+                <th>영역(만점)</th>
+                <th>점수</th>
+                <th>학원 평균</th>
+                <th>대치동 평균</th>
+              </tr>
+              {% for domain in domains %}
+              <tr>
+                <td>{{ domain.name }}({{ domain.max_score|int }})</td>
+                <td>{{ domain.student_score|round(1) }}</td>
+                <td>{{ domain.academy_avg|round(1) }}</td>
+                <td>{{ domain.national_avg|round(1) }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td>총점(100)</td>
+                <td>{{ total_score|round(1) }}</td>
+                <td>{{ academy_avg_total|round(1) }}</td>
+                <td>{{ national_avg_total|round(1) }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="domainChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>정오표</h2>
+        <table class="corr-table">
+          {% for domain in domains %}
+          <tr>
+            <th class="left" rowspan="2">{{ domain.name }}</th>
+            {% for q in domain.questions %}
+            <th>{{ q.question_no }}</th>
+            {% endfor %}
+          </tr>
+          <tr class="group-row">
+            {% for g in domain.group_headers %}
+            <th colspan="{{ g.colspan }}">{{ g.label }}</th>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="left">정답</td>
+            {% for q in domain.questions %}
+            <td>{{ q.answer }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="left">표기</td>
+            {% for q in domain.questions %}
+            <td>{{ q.marked }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="left">정오</td>
+            {% for q in domain.questions %}
+            <td class="{% if q.ox == 'O' %}ox-o{% elif q.ox == 'X' %}ox-x{% else %}ox-empty{% endif %}">{{ q.ox }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="left">오답률</td>
+            {% for q in domain.questions %}
+            <td>-</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="watermark" aria-hidden="true">
+        <div class="circle"></div>
+        <div class="tri"></div>
+      </div>
+    </section>
+
+    <section class="page break-before">
+      <div class="section">
+        <h2>성적 추이</h2>
+        <div class="trend-panel">
+          <canvas id="trendChart" height="310"></canvas>
+        </div>
+      </div>
+      <div class="print-box">
+        <button class="print-btn" onclick="window.print()">🖨 인쇄하기</button>
+        <div class="print-help">✤ 인쇄 옵션에서 PDF로 저장할 수 있습니다 ✤</div>
+      </div>
+      <div class="watermark" aria-hidden="true">
+        <div class="circle"></div>
+        <div class="tri"></div>
+      </div>
+    </section>
+
+    <script>
+      const domainLabels = {{ domain_chart_labels|tojson }};
+      const domainStudent = {{ domain_chart_student|tojson }};
+      const domainAcademy = {{ domain_chart_academy|tojson }};
+      const domainNational = {{ domain_chart_national|tojson }};
+
+      new Chart(document.getElementById("domainChart"), {
+        type: "bar",
+        data: {
+          labels: domainLabels,
+          datasets: [
+            { label: "내 점수", data: domainStudent, backgroundColor: "#9350e9" },
+            { label: "학원", data: domainAcademy, backgroundColor: "#f08085" },
+            { label: "대치동", data: domainNational, backgroundColor: "#6db6eb" },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 5 } },
+          },
+          plugins: { legend: { position: "top" } },
+        },
+      });
+
+      const historyLabels = {{ history_labels|tojson }};
+      const historyStudent = {{ history_student|tojson }};
+      const historyAcademy = {{ history_academy|tojson }};
+      const historyNational = {{ history_national|tojson }};
+
+      new Chart(document.getElementById("trendChart"), {
+        type: "bar",
+        data: {
+          labels: historyLabels,
+          datasets: [
+            { label: "내 점수", data: historyStudent, backgroundColor: "#9350e9" },
+            { label: "학원", data: historyAcademy, backgroundColor: "#f08085" },
+            { label: "대치동", data: historyNational, backgroundColor: "#6db6eb" },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { stepSize: 10 } },
+          },
+          plugins: { legend: { position: "top" } },
+        },
+      });
+    </script>
+  </body>
+</html>

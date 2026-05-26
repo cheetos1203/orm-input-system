@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/uploads/*
+data/outputs/*
+data/review/*
+data/layout.json
+data/report_config.json
+!data/uploads/.gitkeep
+!data/outputs/.gitkeep
+!data/review/.gitkeep

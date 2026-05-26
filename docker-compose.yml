@@ -1,0 +1,14 @@
+services:
+  omr-web:
+    build: .
+    container_name: omr-web
+    ports:
+      - "8000:8000"
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      APP_RELOAD: "false"
+      APP_WORKERS: 1
+    volumes:
+      - ./data:/code/data
+    restart: unless-stopped
