@@ -1,5 +1,7 @@
 # OMR 입력 + 성적처리 시스템 (오픈소스 우선, API 폴백)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/cheetos1203/orm-input-system)
+
 이 프로젝트는 다음 목표를 위한 MVP입니다.
 
 - 기본 인식: **완전 로컬 오픈소스(OpenCV + Tesseract)** 로 처리 (API 비용 0원)
