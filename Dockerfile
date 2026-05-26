@@ -19,6 +19,7 @@ COPY app /code/app
 COPY data /code/data
 COPY run_web.py /code/run_web.py
 COPY .env.example /code/.env.example
+RUN cp /code/.env.example /code/.env
 
 RUN mkdir -p /code/data/uploads /code/data/outputs /code/data/review
 
