@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: orm-input-system
+    runtime: python
+    buildCommand: |
+      pip install -r requirements.txt
+      apt-get update && apt-get install -y tesseract-ocr tesseract-ocr-kor || true
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_HOST
+        value: 0.0.0.0
+      - key: APP_PORT
+        value: 10000
+      - key: APP_RELOAD
+        value: false
+      - key: TESSERACT_CMD
+        value: /usr/bin/tesseract
+      - key: PYTHON_VERSION
+        value: 3.11.9
